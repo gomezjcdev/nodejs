@@ -1,12 +1,41 @@
 const mongoose = require("mongoose");
 
-const StorageSchema = new mongoose.Schema(
+const TrackSchema = new mongoose.Schema(
     {
-        url: {
+        name: {
             type: String,
         },
-        fileName: {
+        album: {
             type: String
+        },
+        cover: {
+            type: String,
+            validate: (req) => {
+                return true;
+            },
+            message: "ERROR_URL",
+        },
+        artist: {
+            name: {
+                type: String,
+            },
+            nickname: {
+                type: String,
+            },
+            nationality: {
+                type: String,
+            }
+        },
+        duration: {
+            start: {
+                type: Number,
+            },
+            end: {
+                type: Number,
+            }
+        },
+        mediaId: {
+            type: mongoose.Types.ObjectId
         }
     },
     {
@@ -15,4 +44,4 @@ const StorageSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model("storages", StorageSchema);
+module.exports = mongoose.model("tracks", TrackSchema);
