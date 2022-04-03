@@ -1,13 +1,14 @@
 const express = require('express');
 const { getTrack, getTracks, createTrack, updateTrack, deleteTrack } = require("../controllers/tracks");
 const { validatorCreateTrack, validatorTrackId } = require("../validators/tracks");
+const authMiddleware = require("../middleware/session");
 
 const router = express.Router();
 
 /**
  * Get all Tracks
  */
-router.get('/', getTracks);
+router.get('/', authMiddleware, getTracks);
 
 /**
  * Get Track by id
