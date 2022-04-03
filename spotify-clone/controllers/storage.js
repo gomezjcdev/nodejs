@@ -1,13 +1,21 @@
 const { storageModel } = require('../models');
+const { handleHttpError } = require("../utils/handleError");
+const { matchedData } = require("express-validator");
+const fs = require('fs');
 const PUBLIC_URL = process.env.PUBLIC_URL;
+const MEDIA_PATH = `${ __dirname }/../storage`;
 /**
  * get storage list
  * @param req
  * @param res
  */
 const getStorages = async (req, res) => {
+  try {
     const data = await storageModel.find({});
     res.send({ data });
+  } catch (err) {
+    handleHttpError(res, err);
+  }
 }
 
 /**
@@ -15,10 +23,15 @@ const getStorages = async (req, res) => {
  * @param req
  * @param res
  */
-const getStorage = (req, res) => {
-    const data = ["hola", "mundo", req.id];
-
+const getStorage = async (req, res) => {
+  try {
+    const body = matchedData(req);
+    const { id } = body;
+    const data = await storageModel.findById(id);
     res.send({ data });
+  } catch (err) {
+    handleHttpError(res, err);
+  }
 }
 
 /**
@@ -27,12 +40,16 @@ const getStorage = (req, res) => {
  * @param res
  */
 const createStorage = async (req, res) => {
+  try {
     const { file } = req;
     const data = await storageModel.create({
-        filename: file.filename,
-        url: `${PUBLIC_URL}/${file.filename}`
+      filename: file.filename,
+      url: `${ PUBLIC_URL }/${ file.filename }`
     });
-    res.send({ data })
+    res.send({ data });
+  } catch (err) {
+    handleHttpError(res, err);
+  }
 }
 
 /**
@@ -41,6 +58,11 @@ const createStorage = async (req, res) => {
  * @param res
  */
 const updateStorage = (req, res) => {
+  try {
+
+  } catch (err) {
+    handleHttpError(res, err);
+  }
 }
 
 /**
@@ -48,13 +70,27 @@ const updateStorage = (req, res) => {
  * @param req
  * @param res
  */
-const deleteStorage = (req, res) => {
+const deleteStorage = async (req, res) => {
+  try {
+    const body = matchedData(req);
+    const { id } = body;
+    const data = await storageModel.findById(id);
+    await storageModel.deleteOne({ _id: id });
+    const filePath = `${ MEDIA_PATH }/${ data.filename }`;
+    fs.unlinkSync(filePath);
+    res.send({
+      filePath,
+      deleted: true
+    });
+  } catch (err) {
+    handleHttpError(res, err);
+  }
 }
 
 module.exports = {
-    getStorages,
-    getStorage,
-    createStorage,
-    updateStorage,
-    deleteStorage,
+  getStorages,
+  getStorage,
+  createStorage,
+  updateStorage,
+  deleteStorage,
 };

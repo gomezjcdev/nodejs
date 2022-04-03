@@ -1,4 +1,6 @@
 const { tracksModel } = require('../models');
+const { handleHttpError } = require("../utils/handleError");
+const { matchedData } = require("express-validator");
 
 /**
  * get track list
@@ -6,8 +8,12 @@ const { tracksModel } = require('../models');
  * @param res
  */
 const getTracks = async (req, res) => {
+  try {
     const data = await tracksModel.find({});
     res.send({ data });
+  } catch (error) {
+    handleHttpError(res, error);
+  }
 }
 
 /**
@@ -15,10 +21,15 @@ const getTracks = async (req, res) => {
  * @param req
  * @param res
  */
-const getTrack = (req, res) => {
-    const data = ["hola", "mundo", req.id];
-
+const getTrack = async (req, res) => {
+  try {
+    const body = matchedData(req);
+    const { id } = body;
+    const data = await tracksModel.findById(id);
     res.send({ data });
+  } catch (error) {
+    handleHttpError(res, error);
+  }
 }
 
 /**
@@ -27,9 +38,15 @@ const getTrack = (req, res) => {
  * @param res
  */
 const createTrack = async (req, res) => {
-    const { body } = req;
+  try {
+    const body = matchedData(req);
+
     const data = await tracksModel.create(body);
-    res.send({ data })
+    res.send({ data });
+
+  } catch (error) {
+    handleHttpError(res, error);
+  }
 }
 
 /**
@@ -37,7 +54,14 @@ const createTrack = async (req, res) => {
  * @param req
  * @param res
  */
-const updateTrack = (req, res) => {
+const updateTrack = async (req, res) => {
+  try {
+    const { id, ...body } = matchedData(req);
+    const data = await tracksModel.findOneAndUpdate(id, body, { update: true });
+    res.send({ data });
+  } catch (error) {
+    handleHttpError(res, error);
+  }
 }
 
 /**
@@ -45,13 +69,21 @@ const updateTrack = (req, res) => {
  * @param req
  * @param res
  */
-const deleteTrack = (req, res) => {
+const deleteTrack = async (req, res) => {
+  try {
+    const body = matchedData(req);
+    const { id } = body;
+    const data = await tracksModel.delete({ _id: id })
+    res.send({ data });
+  } catch (error) {
+    handleHttpError(res, error);
+  }
 }
 
 module.exports = {
-    getTracks,
-    getTrack,
-    createTrack,
-    updateTrack,
-    deleteTrack,
+  getTracks,
+  getTrack,
+  createTrack,
+  updateTrack,
+  deleteTrack,
 };
