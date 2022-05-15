@@ -9,7 +9,7 @@ const { matchedData } = require("express-validator");
  */
 const getTracks = async (req, res) => {
   try {
-    const data = await tracksModel.find({});
+    const data = await tracksModel.findAllData({});
     res.send({ data });
   } catch (error) {
     handleHttpError(res, error);

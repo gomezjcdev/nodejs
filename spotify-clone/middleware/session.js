@@ -1,6 +1,9 @@
 const { handleHttpError } = require("../utils/handleError");
 const { verifyToken } = require("../utils/handleJwt");
 const { usersModel } = require("../models");
+const getProperties = require("../utils/handleEngineProperties");
+const propertiesKey = getProperties();
+
 const authMiddleware = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
@@ -11,15 +14,18 @@ const authMiddleware = async (req, res, next) => {
     const token = req.headers.authorization.split(' ').pop();
     const dataPayload = await verifyToken(token);
 
-    if (!dataPayload.id) {
-      handleHttpError(res, "ERROR_ID_TOKEN", 401);
+    if (!dataPayload) {
+      handleHttpError(res, "MISSING_PAYLOAD", 401);
       return;
     }
 
-    req.user = await usersModel.findById(dataPayload.id);
+    const query = {
+      [propertiesKey.id]: dataPayload[propertiesKey.id]
+    }
+
+    req.user = await usersModel.findOne(query);
 
     next();
-
   } catch (e) {
     handleHttpError(res, e);
   }
